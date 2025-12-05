@@ -66,10 +66,9 @@ export async function PATCH(
         .from('buses')
         .select('fleet_number')
         .eq('id', maintenanceEvent.bus_id)
-        .single()('id', maintenanceEvent.bus_id)
         .single()
       
-      if (busResult) {
+      if (busResult && busResult.fleet_number) {
         const updateMessage = `Maintenance status updated: ${maintenanceEvent.description?.substring(0, 100) || 'Maintenance event'}${maintenanceEvent.description && maintenanceEvent.description.length > 100 ? '...' : ''}\nStatus: ${status}`
         await notifyBusFollowers(maintenanceEvent.bus_id, busResult.fleet_number, updateMessage)
       }
