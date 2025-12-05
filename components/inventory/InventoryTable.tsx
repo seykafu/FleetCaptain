@@ -147,7 +147,7 @@ export function InventoryTable({ garageFilter, searchTerm }: InventoryTableProps
           .update({
             [field]: value,
             updated_at: new Date().toISOString(),
-          })
+          } as Partial<InventoryItem>)
           .eq('id', id)
 
         if (updateError) {
