@@ -9,6 +9,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json()
+    console.log('[log-issue] Received request body:', JSON.stringify(body, null, 2))
     const { 
       type = 'INCIDENT', 
       severity = 'MEDIUM', 
@@ -18,8 +19,11 @@ export async function POST(
       garageId, 
       partsUsed,
       busStatus, // New: explicit bus status from form
-      maintenanceType = 'INCIDENT' // Type of maintenance event (INCIDENT, PREVENTIVE, REPAIR, INSPECTION, UPDATE)
+      maintenanceType = type // Default to 'type' if maintenanceType not provided, for backward compatibility
     } = body
+    
+    // Log what we're using
+    console.log('[log-issue] Using maintenanceType:', maintenanceType, 'from body.maintenanceType:', body.maintenanceType, 'from body.type:', body.type)
 
     if (!description || !mechanicName) {
       return NextResponse.json(

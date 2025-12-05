@@ -84,7 +84,14 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData)
-        setFormData(prev => ({ ...prev, ...parsed }))
+        // Don't overwrite maintenanceType from localStorage if it's not present or is old
+        // Only restore it if it's a valid value
+        const restoredData = { ...parsed }
+        if (!restoredData.maintenanceType || !['INCIDENT', 'PREVENTIVE', 'REPAIR', 'INSPECTION', 'UPDATE'].includes(restoredData.maintenanceType)) {
+          // Keep the default maintenanceType from initial state
+          delete restoredData.maintenanceType
+        }
+        setFormData(prev => ({ ...prev, ...restoredData }))
         if (parsed.mechanicName) {
           setSelectedUser({ id: '', name: parsed.mechanicName })
         }
@@ -354,7 +361,11 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
           </label>
           <select
             value={formData.maintenanceType}
-            onChange={(e) => setFormData({ ...formData, maintenanceType: e.target.value as 'INCIDENT' | 'PREVENTIVE' | 'REPAIR' | 'INSPECTION' | 'UPDATE' })}
+            onChange={(e) => {
+              const newType = e.target.value as 'INCIDENT' | 'PREVENTIVE' | 'REPAIR' | 'INSPECTION' | 'UPDATE'
+              console.log('[QuickLogForm] Maintenance type changed to:', newType)
+              setFormData({ ...formData, maintenanceType: newType })
+            }}
             className="w-full border border-borderLight rounded-lg px-4 py-3 text-base bg-white text-textMain focus:outline-none focus:ring-2 focus:ring-primary"
             required
           >
