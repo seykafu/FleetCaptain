@@ -34,10 +34,15 @@ export async function sendSMS(
   }
 
   try {
+    // Optional: Add status callback URL to track delivery status
+    // This requires a webhook endpoint at /api/twilio/status-callback
+    const statusCallbackUrl = process.env.TWILIO_STATUS_CALLBACK_URL
+    
     await twilioClient.messages.create({
       body: message,
       from: fromNumber,
       to: to,
+      ...(statusCallbackUrl && { statusCallback: statusCallbackUrl }),
     })
 
     await supabase.from('notification_logs').insert({
