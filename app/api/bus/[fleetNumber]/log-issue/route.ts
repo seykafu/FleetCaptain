@@ -83,6 +83,9 @@ export async function POST(
       maintenanceStatus = busStatus === 'IN_MAINTENANCE' ? 'IN_PROGRESS' : 'NEW'
     }
     
+    // Log the maintenance type being used for debugging
+    console.log(`[log-issue] Creating maintenance event with type: ${maintenanceType}, status: ${maintenanceStatus}`)
+    
     // Create maintenance event
     const { data: maintenanceEvent, error: eventError } = await supabase
       .from('maintenance_events')
@@ -99,6 +102,11 @@ export async function POST(
       })
       .select()
       .single()
+    
+    // Log what was actually created
+    if (maintenanceEvent) {
+      console.log(`[log-issue] Maintenance event created with type: ${maintenanceEvent.type}, status: ${maintenanceEvent.status}`)
+    }
 
     if (eventError || !maintenanceEvent) {
       console.error('Failed to create maintenance event:', eventError)
