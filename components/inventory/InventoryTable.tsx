@@ -142,12 +142,13 @@ export function InventoryTable({ garageFilter, searchTerm }: InventoryTableProps
       updateItemOptimistically(id, { [field]: value, updated_at: new Date().toISOString() })
 
       try {
+        const updateData: Record<string, any> = {
+          [field]: value,
+          updated_at: new Date().toISOString(),
+        }
         const { error: updateError } = await supabaseClient
           .from('inventory_items')
-          .update({
-            [field]: value,
-            updated_at: new Date().toISOString(),
-          } as Partial<InventoryItem>)
+          .update(updateData)
           .eq('id', id)
 
         if (updateError) {
