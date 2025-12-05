@@ -4,6 +4,7 @@ import { StatusBadge } from './StatusBadge'
 import { SeverityBadge } from './SeverityBadge'
 import { Card } from './Card'
 import { useState } from 'react'
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 // Using simple text indicators for sorting
 
 type SortField = 'bus' | 'issue' | 'severity' | 'status' | 'garage' | 'mechanic' | 'started' | null
@@ -41,6 +42,7 @@ export function MaintenanceBacklog({ events: initialEvents }: MaintenanceBacklog
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [sortField, setSortField] = useState<SortField>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
+  const [isExpanded, setIsExpanded] = useState(true)
 
   const filteredEvents = events.filter((event) => {
     if (filterGarage !== 'all' && event.garageId !== filterGarage) return false
@@ -133,8 +135,31 @@ export function MaintenanceBacklog({ events: initialEvents }: MaintenanceBacklog
   }
 
   return (
-    <Card title="Maintenance Backlog">
-      <div className="mb-4 flex flex-wrap gap-3">
+    <Card 
+      title="Maintenance Backlog"
+      headerAction={
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 text-sm text-textMuted hover:text-textMain transition-colors"
+          aria-label={isExpanded ? 'Collapse table' : 'Expand table'}
+        >
+          {isExpanded ? (
+            <>
+              <ChevronUpIcon className="w-4 h-4" />
+              Collapse
+            </>
+          ) : (
+            <>
+              <ChevronDownIcon className="w-4 h-4" />
+              Expand
+            </>
+          )}
+        </button>
+      }
+    >
+      {isExpanded && (
+        <>
+          <div className="mb-4 flex flex-wrap gap-3">
         <select
           value={filterGarage}
           onChange={(e) => setFilterGarage(e.target.value)}
@@ -313,6 +338,8 @@ export function MaintenanceBacklog({ events: initialEvents }: MaintenanceBacklog
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </Card>
   )
 }

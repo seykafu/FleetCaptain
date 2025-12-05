@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Card } from './Card'
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 
 interface InventoryItemWithGarage {
   id: string
@@ -25,6 +26,7 @@ export function InventoryTable() {
   const [editValue, setEditValue] = useState<string>('')
   const [filterGarage, setFilterGarage] = useState<string>('all')
   const [saving, setSaving] = useState<string | null>(null)
+  const [isExpanded, setIsExpanded] = useState(true)
 
   useEffect(() => {
     fetchItems()
@@ -110,23 +112,46 @@ export function InventoryTable() {
   const garages = allGarages.length > 0 ? allGarages : garagesFromItems
 
   return (
-    <Card title="Inventory">
-      <div className="mb-4">
-        <select
-          value={filterGarage}
-          onChange={(e) => setFilterGarage(e.target.value)}
-          className="text-sm border border-borderLight rounded-lg px-3 py-2 bg-white text-textMain focus:outline-none focus:ring-2 focus:ring-primary"
+    <Card 
+      title="Inventory"
+      headerAction={
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 text-sm text-textMuted hover:text-textMain transition-colors"
+          aria-label={isExpanded ? 'Collapse table' : 'Expand table'}
         >
-          <option value="all">All Garages</option>
-          {garages.map((garage) => (
-            <option key={garage.id} value={garage.id}>
-              {garage.name}
-            </option>
-          ))}
-        </select>
-      </div>
+          {isExpanded ? (
+            <>
+              <ChevronUpIcon className="w-4 h-4" />
+              Collapse
+            </>
+          ) : (
+            <>
+              <ChevronDownIcon className="w-4 h-4" />
+              Expand
+            </>
+          )}
+        </button>
+      }
+    >
+      {isExpanded && (
+        <>
+          <div className="mb-4">
+            <select
+              value={filterGarage}
+              onChange={(e) => setFilterGarage(e.target.value)}
+              className="text-sm border border-borderLight rounded-lg px-3 py-2 bg-white text-textMain focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">All Garages</option>
+              {garages.map((garage) => (
+                <option key={garage.id} value={garage.id}>
+                  {garage.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div className="overflow-x-auto">
+          <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
             <tr className="bg-[#F9FBFF] border-b border-borderLight">
@@ -231,6 +256,8 @@ export function InventoryTable() {
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </Card>
   )
 }
