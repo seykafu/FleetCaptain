@@ -219,20 +219,24 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
 
     setSubmitting(true)
 
+    // Log what we're sending for debugging
+    const payload = {
+      type: 'INCIDENT', // Keep for backward compatibility, but use maintenanceType for the actual event
+      severity: 'MEDIUM',
+      description: formData.description,
+      mechanicName: formData.mechanicName,
+      garageId: formData.garageId,
+      busStatus: formData.busStatus,
+      maintenanceType: formData.maintenanceType,
+      takeIntoGarage: formData.busStatus === 'IN_MAINTENANCE',
+    }
+    console.log('[QuickLogForm] Submitting with maintenanceType:', formData.maintenanceType, 'Full payload:', payload)
+
     try {
       const response = await fetch(`/api/bus/${bus.fleetNumber}/log-issue`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'INCIDENT', // Keep for backward compatibility, but use maintenanceType for the actual event
-          severity: 'MEDIUM',
-          description: formData.description,
-          mechanicName: formData.mechanicName,
-          garageId: formData.garageId,
-          busStatus: formData.busStatus,
-          maintenanceType: formData.maintenanceType,
-          takeIntoGarage: formData.busStatus === 'IN_MAINTENANCE',
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (response.ok) {
