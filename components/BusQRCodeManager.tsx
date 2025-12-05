@@ -32,7 +32,7 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
           if (response.ok) {
             const data = await response.json()
             const formattedBuses = data.map((bus: any) => ({
-              fleet_number: bus.fleet_number || bus.fleetNumber || ''
+              fleet_number: bus.fleet_number || ''
             })).filter((bus: Bus) => bus.fleet_number)
             setBuses(formattedBuses)
             console.log('BusQRCodeManager - Fetched buses:', formattedBuses.length)
@@ -218,7 +218,7 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
               </option>
               {buses && buses.length > 0 ? (
                 buses.map((bus) => {
-                  const fleetNumber = bus.fleet_number || bus.fleetNumber || ''
+                  const fleetNumber = bus.fleet_number || ''
                   return (
                     <option key={fleetNumber} value={fleetNumber}>
                       {fleetNumber}
