@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { notifyRepairCompleted } from '@/lib/twilio'
+import { notifyRepairCompleted, notifyBusFollowers } from '@/lib/twilio'
 
 export async function PATCH(
   request: NextRequest,
@@ -48,11 +48,30 @@ export async function PATCH(
       ])
 
       if (garageResult.data && busResult.data) {
-        // Send SMS notification
+        // Send SMS notification to ops manager
         await notifyRepairCompleted(
           busResult.data.fleet_number,
           garageResult.data.name
         )
+        
+        // Notify all followers that maintenance was completed
+        const updateMessage = `Maintenance completed: ${maintenanceEvent.description?.substring(0, 100) || 'Maintenance event'}${maintenanceEvent.description && maintenanceEvent.description.length > 100 ? '...' : ''}\nGarage: ${garageResult.data.name}\nStatus: COMPLETED`
+        await notifyBusFollowers(maintenanceEvent.bus_id, busResult.data.fleet_number, updateMessage)
+      }
+    }
+
+    // Notify followers of any status change (not just completion)
+    if (status && status !== maintenanceEvent.status) {
+      const { data: busResult } = await supabase
+        .from('buses')
+        .select('fleet_number')
+        .eq('id', maintenanceEvent.bus_id)
+        .single()('id', maintenanceEvent.bus_id)
+        .single()
+      
+      if (busResult) {
+        const updateMessage = `Maintenance status updated: ${maintenanceEvent.description?.substring(0, 100) || 'Maintenance event'}${maintenanceEvent.description && maintenanceEvent.description.length > 100 ? '...' : ''}\nStatus: ${status}`
+        await notifyBusFollowers(maintenanceEvent.bus_id, busResult.fleet_number, updateMessage)
       }
     }
 
