@@ -81,9 +81,9 @@ export function InventoryTable({ garageFilter, searchTerm }: InventoryTableProps
         .select('id, name, code')
         .in('id', garageIds)
 
-      const garageMap = new Map((garagesData || []).map((g) => [g.id, g]))
+      const garageMap = new Map((garagesData || []).map((g: Garage) => [g.id, g]))
 
-      const itemsWithGarages = (data || []).map((item) => ({
+      const itemsWithGarages = (data || []).map((item: InventoryItem) => ({
         ...item,
         garage: garageMap.get(item.garage_id) || null,
       }))
