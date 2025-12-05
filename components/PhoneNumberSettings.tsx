@@ -132,7 +132,7 @@ export function PhoneNumberSettings() {
                       {editingUserId === user.id ? (
                         <div className="flex items-center gap-2">
                           <input
-                            ref={(el) => (inputRefs.current[user.id] = el)}
+                            ref={(el) => { inputRefs.current[user.id] = el }}
                             type="tel"
                             value={phoneValue}
                             onChange={(e) => setPhoneValue(e.target.value)}
