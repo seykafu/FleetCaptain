@@ -5,6 +5,10 @@ import { Card } from '@/components/Card'
 import { CreateBusForm } from '@/components/CreateBusForm'
 import Link from 'next/link'
 
+// Force dynamic rendering to always show fresh bus status
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function BusesPage() {
   // Fetch buses without join first (more reliable)
   const { data: buses, error: busesError } = await supabase
