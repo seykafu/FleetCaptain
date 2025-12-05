@@ -5,20 +5,21 @@ import { AIChatbot } from '@/components/AIChatbot'
 import { supabase } from '@/lib/supabase'
 
 export default async function ForecastsPage() {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  tomorrow.setHours(0, 0, 0, 0)
+  // Get historical data going back 60 days and future data up to 14 days
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - 60) // 60 days ago
+  startDate.setHours(0, 0, 0, 0)
 
-  const fourteenDaysFromNow = new Date()
-  fourteenDaysFromNow.setDate(fourteenDaysFromNow.getDate() + 14)
-  fourteenDaysFromNow.setHours(0, 0, 0, 0)
+  const endDate = new Date()
+  endDate.setDate(endDate.getDate() + 14) // 14 days from now
+  endDate.setHours(0, 0, 0, 0)
 
   // Fetch forecasts - get all recent ones and group by target_date (take most recent for each date)
   const { data: allForecasts } = await supabase
     .from('forecast_snapshots')
     .select('*')
-    .gte('target_date', tomorrow.toISOString())
-    .lte('target_date', fourteenDaysFromNow.toISOString())
+    .gte('target_date', startDate.toISOString())
+    .lte('target_date', endDate.toISOString())
     .order('date_generated', { ascending: false })
 
   // Group by target_date and take the most recent forecast for each date
