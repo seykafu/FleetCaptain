@@ -236,9 +236,11 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
       if (response.ok) {
         // Clear saved draft
         localStorage.removeItem(`quick-log-${bus.fleetNumber}`)
-        // Show success and redirect
+        // Show success and redirect with cache busting
         alert('Maintenance update submitted successfully!')
-        router.push(`/bus/${bus.fleetNumber}`)
+        // Use router.refresh() to force a server-side refresh, then navigate
+        router.refresh()
+        router.push(`/bus/${bus.fleetNumber}?t=${Date.now()}`)
       } else {
         const error = await response.json()
         alert(`Error: ${error.message || 'Failed to submit update'}`)

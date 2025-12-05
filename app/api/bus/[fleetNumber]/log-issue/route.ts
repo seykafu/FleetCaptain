@@ -94,11 +94,14 @@ export async function POST(
       .single()
 
     if (eventError || !maintenanceEvent) {
+      console.error('Failed to create maintenance event:', eventError)
       return NextResponse.json(
-        { error: 'Failed to create maintenance event', details: eventError },
+        { error: 'Failed to create maintenance event', details: eventError?.message || 'Unknown error' },
         { status: 500 }
       )
     }
+
+    console.log('Maintenance event created successfully:', maintenanceEvent.id, 'for bus:', bus.fleet_number)
 
     // Auto-follow: Find maintenance user by name and make them follow this bus
     if (mechanicName) {
