@@ -75,7 +75,7 @@ export function InventoryTable({ garageFilter, searchTerm }: InventoryTableProps
       if (itemsError) throw itemsError
 
       // Fetch garages for each item
-      const garageIds = [...new Set((data || []).map((item) => item.garage_id))]
+      const garageIds = [...new Set((data || []).map((item: InventoryItem) => item.garage_id))]
       const { data: garagesData } = await supabaseClient
         .from('garages')
         .select('id, name, code')
