@@ -21,6 +21,7 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
   const [localIP, setLocalIP] = useState<string>('')
   const [showIPHelp, setShowIPHelp] = useState(false)
   const [loadingBuses, setLoadingBuses] = useState(false)
+  const [isLocalhost, setIsLocalhost] = useState(false)
 
   // Fetch buses on client side if not provided or empty
   useEffect(() => {
@@ -54,12 +55,17 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
 
   // Load saved IP from localStorage
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    setIsLocalhost(isLocal)
+    
     const savedIP = localStorage.getItem('local-network-ip')
     if (savedIP) {
       setLocalIP(savedIP)
     } else {
       // Try to detect if we're on localhost and suggest finding IP
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      if (isLocal) {
         setShowIPHelp(true)
       }
     }
@@ -73,8 +79,9 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
   }
 
   const getBaseUrl = () => {
+    if (typeof window === 'undefined') return ''
     // If we have a saved local IP and we're on localhost, use the IP
-    if (localIP && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    if (localIP && isLocalhost) {
       return `http://${localIP}:${window.location.port || 3000}`
     }
     // Otherwise use the current origin (works for production or if already on network IP)
@@ -88,7 +95,8 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
     }
 
     // Check if we need an IP address
-    if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && !localIP) {
+    if (typeof window === 'undefined') return
+    if (isLocalhost && !localIP) {
       alert('Please enter your local network IP address first (see instructions below)')
       setShowIPHelp(true)
       return
@@ -128,7 +136,7 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
   return (
     <div className="space-y-6">
       {/* Network IP Configuration */}
-      {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+      {isLocalhost && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
           <div>
             <h3 className="text-sm font-semibold text-textMain mb-2">Local Network IP Address</h3>
