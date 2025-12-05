@@ -243,7 +243,7 @@ export function BusFollowManager() {
           <p className="font-semibold mb-1">How it works:</p>
           <ul className="list-disc list-inside space-y-1">
             <li>When you log maintenance on a bus, you automatically start following it</li>
-            <li>You'll receive SMS notifications when anyone updates that bus</li>
+            <li>You&apos;ll receive SMS notifications when anyone updates that bus</li>
             <li>Make sure your phone number is set in the Phone Number Settings above</li>
           </ul>
         </div>

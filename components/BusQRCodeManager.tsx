@@ -133,7 +133,7 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
           <div>
             <h3 className="text-sm font-semibold text-textMain mb-2">Local Network IP Address</h3>
             <p className="text-xs text-textMuted mb-3">
-              To access from your phone, enter your computer's local network IP address.
+              To access from your phone, enter your computer&apos;s local network IP address.
             </p>
             <div className="flex gap-2">
               <input
@@ -156,7 +156,7 @@ export function BusQRCodeManager({ buses: initialBuses }: BusQRCodeManagerProps)
             <div className="bg-white rounded-lg p-3 border border-blue-300">
               <p className="text-xs font-semibold text-textMain mb-2">How to find your IP address:</p>
               <ul className="text-xs text-textMuted space-y-1 list-disc list-inside">
-                <li><strong>Windows:</strong> Open Command Prompt, type <code className="bg-gray-100 px-1 rounded">ipconfig</code>, look for "IPv4 Address"</li>
+                <li><strong>Windows:</strong> Open Command Prompt, type <code className="bg-gray-100 px-1 rounded">ipconfig</code>, look for &quot;IPv4 Address&quot;</li>
                 <li><strong>Mac:</strong> System Settings → Network → Wi-Fi/Ethernet → Details → IP Address</li>
                 <li><strong>Linux:</strong> Run <code className="bg-gray-100 px-1 rounded">ip addr</code> or <code className="bg-gray-100 px-1 rounded">ifconfig</code></li>
               </ul>

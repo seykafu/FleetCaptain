@@ -179,7 +179,7 @@ export function PhoneNumberSettings() {
           <p className="font-semibold mb-1">Note:</p>
           <p>
             Phone numbers should be in E.164 format (e.g., +1234567890). When you log maintenance on a bus,
-            you'll automatically follow that bus and receive SMS notifications for future updates.
+            you&apos;ll automatically follow that bus and receive SMS notifications for future updates.
           </p>
         </div>
       </div>

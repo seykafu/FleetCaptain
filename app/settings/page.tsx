@@ -58,7 +58,7 @@ export default async function SettingsPage() {
             <p className="text-xs text-yellow-800">
               <strong>Note:</strong> The dev server has been configured to accept network connections. 
               Make sure to restart your dev server with <code className="bg-yellow-100 px-1 rounded">npm run dev</code> 
-              if you haven't already.
+              if you haven&apos;t already.
             </p>
           </div>
           <BusQRCodeManager buses={formattedBuses} />
