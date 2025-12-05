@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase, Severity } from '@/lib/supabase'
 import { AppShell } from '@/components/layout/AppShell'
 import { FleetHealthSummary } from '@/components/FleetHealthSummary'
 import { MaintenanceBacklog } from '@/components/MaintenanceBacklog'
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
     id: notif.id,
     time: new Date(notif.sent_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
     message: notif.message,
-    severity: notif.type === 'INCIDENT' ? 'CRITICAL' : 'MEDIUM',
+    severity: (notif.type === 'INCIDENT' ? 'CRITICAL' : 'MEDIUM') as Severity,
     busFleetNumber: notif.buses?.fleet_number,
   })) || []
 
