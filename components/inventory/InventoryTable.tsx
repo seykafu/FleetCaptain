@@ -146,9 +146,9 @@ export function InventoryTable({ garageFilter, searchTerm }: InventoryTableProps
           [field]: value,
           updated_at: new Date().toISOString(),
         }
-        const { error: updateError } = await (supabaseClient
-          .from('inventory_items')
-          .update(updateData as any)
+        const { error: updateError } = await ((supabaseClient
+          .from('inventory_items') as any)
+          .update(updateData)
           .eq('id', id))
 
         if (updateError) {
