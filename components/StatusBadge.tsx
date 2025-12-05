@@ -14,6 +14,7 @@ const statusConfig: Record<string, { color: string; bg: string; label: string }>
   NEW: { color: 'text-primary', bg: 'bg-blue-50', label: 'New' },
   IN_PROGRESS: { color: 'text-statusYellow', bg: 'bg-yellow-50', label: 'In Progress' },
   COMPLETED: { color: 'text-statusGreen', bg: 'bg-green-50', label: 'Completed' },
+  UPDATE: { color: 'text-primary', bg: 'bg-blue-50', label: 'Update' },
 }
 
 export function StatusBadge({ status, variant = 'bus' }: StatusBadgeProps) {

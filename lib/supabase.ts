@@ -20,9 +20,9 @@ export const createClientSupabase = () => {
 
 // Database types
 export type BusStatus = 'AVAILABLE' | 'IN_MAINTENANCE' | 'OUT_OF_SERVICE'
-export type MaintenanceType = 'INCIDENT' | 'PREVENTIVE' | 'REPAIR' | 'INSPECTION'
+export type MaintenanceType = 'INCIDENT' | 'PREVENTIVE' | 'REPAIR' | 'INSPECTION' | 'UPDATE'
 export type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
-export type MaintenanceStatus = 'NEW' | 'IN_PROGRESS' | 'COMPLETED'
+export type MaintenanceStatus = 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'UPDATE'
 export type NotificationType = 'INCIDENT' | 'BUS_IN_GARAGE' | 'REPAIR_COMPLETED' | 'FORECAST_UPDATE'
 export type NotificationStatus = 'SENT' | 'FAILED'
 

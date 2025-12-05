@@ -39,6 +39,7 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
     garageId: bus.garageId || initialGarages[0]?.id || '',
     description: '',
     busStatus: bus.status || 'AVAILABLE', // Default to current bus status
+    maintenanceType: 'INCIDENT' as 'INCIDENT' | 'PREVENTIVE' | 'REPAIR' | 'INSPECTION' | 'UPDATE',
   })
   const [userSearch, setUserSearch] = useState('')
   const [userResults, setUserResults] = useState<MaintenanceUser[]>([])
@@ -223,12 +224,13 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'INCIDENT',
+          type: 'INCIDENT', // Keep for backward compatibility, but use maintenanceType for the actual event
           severity: 'MEDIUM',
           description: formData.description,
           mechanicName: formData.mechanicName,
           garageId: formData.garageId,
           busStatus: formData.busStatus,
+          maintenanceType: formData.maintenanceType,
           takeIntoGarage: formData.busStatus === 'IN_MAINTENANCE',
         }),
       })
@@ -341,6 +343,28 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
           )}
         </div>
 
+        {/* Maintenance Type Selection */}
+        <div>
+          <label className="block text-sm font-medium text-textMain mb-1.5">
+            Update Type *
+          </label>
+          <select
+            value={formData.maintenanceType}
+            onChange={(e) => setFormData({ ...formData, maintenanceType: e.target.value as 'INCIDENT' | 'PREVENTIVE' | 'REPAIR' | 'INSPECTION' | 'UPDATE' })}
+            className="w-full border border-borderLight rounded-lg px-4 py-3 text-base bg-white text-textMain focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          >
+            <option value="UPDATE">Update (Status/Details Change)</option>
+            <option value="INCIDENT">Incident</option>
+            <option value="PREVENTIVE">Preventive Maintenance</option>
+            <option value="REPAIR">Repair</option>
+            <option value="INSPECTION">Inspection</option>
+          </select>
+          <p className="text-xs text-textMuted mt-1">
+            Select &quot;Update&quot; to change bus status or details. Other types are for maintenance work.
+          </p>
+        </div>
+
         {/* Bus Status Selection */}
         <div>
           <label className="block text-sm font-medium text-textMain mb-1.5">
@@ -348,12 +372,13 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
           </label>
           <select
             value={formData.busStatus}
-            onChange={(e) => setFormData({ ...formData, busStatus: e.target.value as 'AVAILABLE' | 'IN_MAINTENANCE' })}
+            onChange={(e) => setFormData({ ...formData, busStatus: e.target.value as 'AVAILABLE' | 'IN_MAINTENANCE' | 'OUT_OF_SERVICE' })}
             className="w-full border border-borderLight rounded-lg px-4 py-3 text-base bg-white text-textMain focus:outline-none focus:ring-2 focus:ring-primary"
             required
           >
             <option value="AVAILABLE">Available</option>
             <option value="IN_MAINTENANCE">In Maintenance</option>
+            <option value="OUT_OF_SERVICE">Out of Service</option>
           </select>
           <p className="text-xs text-textMuted mt-1">
             This will update the bus status in the system
@@ -363,13 +388,13 @@ export function QuickLogForm({ bus, garages: initialGarages }: QuickLogFormProps
         {/* Problem Description */}
         <div>
           <label className="block text-sm font-medium text-textMain mb-1.5">
-            Problem Description *
+            {formData.maintenanceType === 'UPDATE' ? 'Update Description *' : 'Problem Description *'}
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="w-full border border-borderLight rounded-lg px-4 py-3 text-base bg-white text-textMain focus:outline-none focus:ring-2 focus:ring-primary min-h-[150px]"
-            placeholder="Describe the problem or maintenance work needed..."
+            placeholder={formData.maintenanceType === 'UPDATE' ? 'Describe the update or change being made...' : 'Describe the problem or maintenance work needed...'}
             required
           />
         </div>

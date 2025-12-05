@@ -17,7 +17,8 @@ export async function POST(
       takeIntoGarage = true, 
       garageId, 
       partsUsed,
-      busStatus // New: explicit bus status from form
+      busStatus, // New: explicit bus status from form
+      maintenanceType = 'INCIDENT' // Type of maintenance event (INCIDENT, PREVENTIVE, REPAIR, INSPECTION, UPDATE)
     } = body
 
     if (!description || !mechanicName) {
@@ -73,8 +74,14 @@ export async function POST(
       }
     }
 
-    // Determine maintenance event status based on bus status
-    const maintenanceStatus = busStatus === 'IN_MAINTENANCE' ? 'IN_PROGRESS' : 'NEW'
+    // Determine maintenance event status based on type and bus status
+    // If it's an UPDATE type, use UPDATE status; otherwise use normal logic
+    let maintenanceStatus: string
+    if (maintenanceType === 'UPDATE') {
+      maintenanceStatus = 'UPDATE'
+    } else {
+      maintenanceStatus = busStatus === 'IN_MAINTENANCE' ? 'IN_PROGRESS' : 'NEW'
+    }
     
     // Create maintenance event
     const { data: maintenanceEvent, error: eventError } = await supabase
@@ -83,7 +90,7 @@ export async function POST(
         bus_id: bus.id,
         garage_id: finalGarageId,
         mechanic_name: mechanicName,
-        type,
+        type: maintenanceType, // Use the maintenanceType parameter
         severity,
         description,
         parts_used: partsUsed || null,

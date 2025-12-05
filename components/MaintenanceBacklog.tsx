@@ -82,7 +82,7 @@ export function MaintenanceBacklog({ events: initialEvents }: MaintenanceBacklog
         bValue = severityOrder[b.severity as keyof typeof severityOrder] || 0
         break
       case 'status':
-        const statusOrder = { NEW: 1, IN_PROGRESS: 2, COMPLETED: 3 }
+        const statusOrder = { NEW: 1, IN_PROGRESS: 2, COMPLETED: 3, UPDATE: 4 }
         aValue = statusOrder[a.status as keyof typeof statusOrder] || 0
         bValue = statusOrder[b.status as keyof typeof statusOrder] || 0
         break
@@ -194,6 +194,7 @@ export function MaintenanceBacklog({ events: initialEvents }: MaintenanceBacklog
           <option value="NEW">New</option>
           <option value="IN_PROGRESS">In Progress</option>
           <option value="COMPLETED">Completed</option>
+          <option value="UPDATE">Update</option>
         </select>
       </div>
 
