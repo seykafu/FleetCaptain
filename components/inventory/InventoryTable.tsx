@@ -231,11 +231,11 @@ export function InventoryTable({ garageFilter, searchTerm }: InventoryTableProps
     setItems((prev) => [optimisticItem, ...prev])
 
     try {
-      const { data, error: insertError } = await supabaseClient
-        .from('inventory_items')
+      const { data, error: insertError } = await ((supabaseClient
+        .from('inventory_items') as any)
         .insert(newItem)
         .select()
-        .single()
+        .single())
 
       if (insertError) throw insertError
 
