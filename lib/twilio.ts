@@ -100,32 +100,58 @@ export async function notifyBusFollowers(
   updateMessage: string
 ): Promise<void> {
   try {
+    console.log(`[notifyBusFollowers] Starting notification for bus ${busFleetNumber} (${busId})`)
+    
     // Get all users following this bus
     const { data: follows, error: followsError } = await supabase
       .from('bus_follows')
       .select('user_id')
       .eq('bus_id', busId)
 
-    if (followsError || !follows || follows.length === 0) {
-      return // No followers or error
+    if (followsError) {
+      console.error('[notifyBusFollowers] Error fetching follows:', followsError)
+      return
     }
+
+    if (!follows || follows.length === 0) {
+      console.log(`[notifyBusFollowers] No followers found for bus ${busFleetNumber}`)
+      return
+    }
+
+    console.log(`[notifyBusFollowers] Found ${follows.length} follower(s)`)
 
     // Get user IDs
     const userIds = follows.map((f: any) => f.user_id)
+    console.log(`[notifyBusFollowers] User IDs:`, userIds)
 
-    // Fetch maintenance users with phone numbers
+    // Fetch maintenance users with phone numbers (check for both null and empty string)
     const { data: users, error: usersError } = await supabase
       .from('maintenance_users')
-      .select('id, phone')
+      .select('id, name, phone')
       .in('id', userIds)
-      .not('phone', 'is', null)
 
-    if (usersError || !users || users.length === 0) {
-      return // No users with phone numbers
+    if (usersError) {
+      console.error('[notifyBusFollowers] Error fetching users:', usersError)
+      return
     }
 
+    if (!users || users.length === 0) {
+      console.log(`[notifyBusFollowers] No users found for IDs:`, userIds)
+      return
+    }
+
+    // Filter to only users with valid phone numbers (not null and not empty)
+    const usersWithPhones = users.filter((user: any) => user.phone && user.phone.trim() !== '')
+    
+    if (usersWithPhones.length === 0) {
+      console.log(`[notifyBusFollowers] No users with phone numbers found. Users:`, users.map((u: any) => ({ id: u.id, name: u.name, hasPhone: !!u.phone })))
+      return
+    }
+
+    console.log(`[notifyBusFollowers] Sending SMS to ${usersWithPhones.length} user(s):`, usersWithPhones.map((u: any) => ({ name: u.name, phone: u.phone })))
+
     // Send SMS to each follower who has a phone number
-    const notifications = users.map((user: any) =>
+    const notifications = usersWithPhones.map((user: any) =>
       sendSMS(
         user.phone,
         `🚌 Bus ${busFleetNumber} Update:\n${updateMessage}`,
@@ -134,9 +160,11 @@ export async function notifyBusFollowers(
       )
     )
 
-    await Promise.all(notifications)
+    const results = await Promise.all(notifications)
+    const successCount = results.filter(r => r === true).length
+    console.log(`[notifyBusFollowers] Sent ${successCount}/${notifications.length} SMS notifications successfully`)
   } catch (error) {
-    console.error('Failed to notify bus followers:', error)
+    console.error('[notifyBusFollowers] Failed to notify bus followers:', error)
     // Don't throw - this is a non-critical operation
   }
 }
