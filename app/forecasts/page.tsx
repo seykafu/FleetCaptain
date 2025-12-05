@@ -13,22 +13,41 @@ export default async function ForecastsPage() {
   fourteenDaysFromNow.setDate(fourteenDaysFromNow.getDate() + 14)
   fourteenDaysFromNow.setHours(0, 0, 0, 0)
 
-  const { data: forecasts } = await supabase
+  // Fetch forecasts - get all recent ones and group by target_date (take most recent for each date)
+  const { data: allForecasts } = await supabase
     .from('forecast_snapshots')
     .select('*')
     .gte('target_date', tomorrow.toISOString())
     .lte('target_date', fourteenDaysFromNow.toISOString())
-    .order('target_date', { ascending: true })
+    .order('date_generated', { ascending: false })
 
-  const transformedForecasts = forecasts?.map((f: any) => ({
-    id: f.id,
-    dateGenerated: f.date_generated,
-    targetDate: f.target_date,
-    availableBusCount: f.available_bus_count,
-    unavailableBusCount: f.unavailable_bus_count,
-    highRiskBusCount: f.high_risk_bus_count,
-    metadata: f.metadata,
-  })) || []
+  // Group by target_date and take the most recent forecast for each date
+  const forecastsByDate = new Map<string, any>()
+  allForecasts?.forEach((f: any) => {
+    const dateKey = f.target_date
+    if (!forecastsByDate.has(dateKey)) {
+      forecastsByDate.set(dateKey, f)
+    } else {
+      // Keep the most recent one
+      const existing = forecastsByDate.get(dateKey)
+      if (new Date(f.date_generated) > new Date(existing.date_generated)) {
+        forecastsByDate.set(dateKey, f)
+      }
+    }
+  })
+
+  // Convert to array and sort by target_date
+  const transformedForecasts = Array.from(forecastsByDate.values())
+    .map((f: any) => ({
+      id: f.id,
+      dateGenerated: f.date_generated,
+      targetDate: f.target_date,
+      availableBusCount: f.available_bus_count || 0,
+      unavailableBusCount: f.unavailable_bus_count || 0,
+      highRiskBusCount: f.high_risk_bus_count || 0,
+      metadata: f.metadata,
+    }))
+    .sort((a, b) => new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime())
 
   return (
     <AppShell pageTitle="Forecasts">
