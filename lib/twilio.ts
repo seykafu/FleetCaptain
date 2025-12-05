@@ -8,6 +8,13 @@ const fromNumber = process.env.TWILIO_FROM_NUMBER
 // Hard-coded ops manager phone number (in production, this would come from a config or user table)
 const OPS_MANAGER_PHONE = process.env.OPS_MANAGER_PHONE || '+1234567890'
 
+// Log Twilio configuration on module load (without sensitive data)
+if (typeof process !== 'undefined') {
+  console.log('[Twilio Config] FROM Number:', fromNumber ? `${fromNumber.substring(0, 4)}...` : 'NOT SET')
+  console.log('[Twilio Config] Account SID:', accountSid ? 'SET' : 'NOT SET')
+  console.log('[Twilio Config] Auth Token:', authToken ? 'SET' : 'NOT SET')
+}
+
 let twilioClient: twilio.Twilio | null = null
 
 if (accountSid && authToken) {
@@ -45,20 +52,35 @@ export async function sendSMS(
       throw new Error('Invalid recipient phone number')
     }
 
-    console.log(`[sendSMS] Sending SMS from ${fromNumber} to ${to}`)
+    // Explicitly log what we're sending to Twilio
+    console.log(`[sendSMS] Preparing to send SMS:`)
+    console.log(`[sendSMS]   FROM (TWILIO_FROM_NUMBER): ${fromNumber}`)
+    console.log(`[sendSMS]   TO (recipient): ${to}`)
+    console.log(`[sendSMS]   Message length: ${message.length} characters`)
 
     // Optional: Add status callback URL to track delivery status
     // This requires a webhook endpoint at /api/twilio/status-callback
     const statusCallbackUrl = process.env.TWILIO_STATUS_CALLBACK_URL
     
-    const result = await twilioClient.messages.create({
+    // Create message with explicit FROM and TO to ensure they're not swapped
+    const messageParams = {
       body: message,
-      from: fromNumber,
-      to: to,
+      from: fromNumber,  // This MUST be your Twilio phone number
+      to: to,            // This MUST be the recipient's phone number
       ...(statusCallbackUrl && { statusCallback: statusCallbackUrl }),
+    }
+    
+    console.log(`[sendSMS] Twilio API call params:`, {
+      from: messageParams.from,
+      to: messageParams.to,
+      bodyLength: messageParams.body.length,
+      hasStatusCallback: !!messageParams.statusCallback
     })
+    
+    const result = await twilioClient.messages.create(messageParams)
 
     console.log(`[sendSMS] SMS sent successfully. Message SID: ${result.sid}`)
+    console.log(`[sendSMS] Twilio response - From: ${result.from}, To: ${result.to}, Status: ${result.status}`)
 
     await supabase.from('notification_logs').insert({
       type,
