@@ -170,7 +170,10 @@ export async function POST(
       .single()
 
     const updateMessage = `${mechanicName} logged: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}${garage ? `\nGarage: ${garage.name}` : ''}\nStatus: ${busStatus}`
+    
+    console.log(`[log-issue] Calling notifyBusFollowers for bus ${bus.fleet_number} (ID: ${bus.id})`)
     await notifyBusFollowers(bus.id, bus.fleet_number, updateMessage)
+    console.log(`[log-issue] Completed notifyBusFollowers call`)
 
     // Link incident to maintenance event if created
     if (incidentId && maintenanceEvent.id) {
