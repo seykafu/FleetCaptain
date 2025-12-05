@@ -34,16 +34,31 @@ export async function sendSMS(
   }
 
   try {
+    // Validate phone numbers
+    if (!fromNumber) {
+      console.error('[sendSMS] TWILIO_FROM_NUMBER is not set in environment variables')
+      throw new Error('TWILIO_FROM_NUMBER environment variable is required')
+    }
+
+    if (!to || to.trim() === '' || to === '+1234567890') {
+      console.error('[sendSMS] Invalid recipient phone number:', to)
+      throw new Error('Invalid recipient phone number')
+    }
+
+    console.log(`[sendSMS] Sending SMS from ${fromNumber} to ${to}`)
+
     // Optional: Add status callback URL to track delivery status
     // This requires a webhook endpoint at /api/twilio/status-callback
     const statusCallbackUrl = process.env.TWILIO_STATUS_CALLBACK_URL
     
-    await twilioClient.messages.create({
+    const result = await twilioClient.messages.create({
       body: message,
       from: fromNumber,
       to: to,
       ...(statusCallbackUrl && { statusCallback: statusCallbackUrl }),
     })
+
+    console.log(`[sendSMS] SMS sent successfully. Message SID: ${result.sid}`)
 
     await supabase.from('notification_logs').insert({
       type,
@@ -156,14 +171,21 @@ export async function notifyBusFollowers(
     console.log(`[notifyBusFollowers] Sending SMS to ${usersWithPhones.length} user(s):`, usersWithPhones.map((u: any) => ({ name: u.name, phone: u.phone })))
 
     // Send SMS to each follower who has a phone number
-    const notifications = usersWithPhones.map((user: any) =>
-      sendSMS(
+    const notifications = usersWithPhones.map((user: any) => {
+      // Validate phone number before sending
+      if (!user.phone || user.phone.trim() === '' || user.phone === '+1234567890') {
+        console.warn(`[notifyBusFollowers] Skipping invalid phone number for user ${user.name}: ${user.phone}`)
+        return Promise.resolve(false)
+      }
+      
+      console.log(`[notifyBusFollowers] Sending SMS to ${user.name} at ${user.phone}`)
+      return sendSMS(
         user.phone,
         `🚌 Bus ${busFleetNumber} Update:\n${updateMessage}`,
         'BUS_IN_GARAGE' as NotificationType,
         busId
       )
-    )
+    })
 
     const results = await Promise.all(notifications)
     const successCount = results.filter(r => r === true).length
