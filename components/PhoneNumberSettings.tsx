@@ -15,6 +15,11 @@ export function PhoneNumberSettings() {
   const [phoneValue, setPhoneValue] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState<string | null>(null)
+  const [showAddUser, setShowAddUser] = useState(false)
+  const [newUserName, setNewUserName] = useState('')
+  const [newUserEmail, setNewUserEmail] = useState('')
+  const [newUserPhone, setNewUserPhone] = useState('')
+  const [addingUser, setAddingUser] = useState(false)
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
 
   useEffect(() => {
@@ -95,6 +100,43 @@ export function PhoneNumberSettings() {
     setEditingUserId(null)
   }
 
+  const handleAddUser = async () => {
+    if (!newUserName.trim()) {
+      alert('Please enter a name')
+      return
+    }
+
+    setAddingUser(true)
+    try {
+      const response = await fetch('/api/maintenance-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newUserName.trim(),
+          email: newUserEmail.trim() || null,
+          phone: newUserPhone.trim() || null,
+        }),
+      })
+
+      if (response.ok) {
+        const newUser = await response.json()
+        setUsers((prev) => [...prev, newUser].sort((a, b) => a.name.localeCompare(b.name)))
+        setNewUserName('')
+        setNewUserEmail('')
+        setNewUserPhone('')
+        setShowAddUser(false)
+      } else {
+        const error = await response.json()
+        alert(`Failed to add user: ${error.message || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Failed to add user:', error)
+      alert('Failed to add user. Please try again.')
+    } finally {
+      setAddingUser(false)
+    }
+  }
+
   if (loading) {
     return (
       <Card title="Phone Number Settings" subtitle="Manage phone numbers for SMS notifications">
@@ -109,6 +151,73 @@ export function PhoneNumberSettings() {
       subtitle="Add phone numbers to receive SMS notifications for buses you follow"
     >
       <div className="space-y-4">
+        {/* Add User Section */}
+        <div className="flex justify-between items-center">
+          <div></div>
+          {!showAddUser ? (
+            <button
+              onClick={() => setShowAddUser(true)}
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+            >
+              + Add User
+            </button>
+          ) : (
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                placeholder="Name (required)"
+                className="border border-borderLight rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newUserName.trim()) {
+                    handleAddUser()
+                  }
+                  if (e.key === 'Escape') {
+                    setShowAddUser(false)
+                    setNewUserName('')
+                    setNewUserEmail('')
+                    setNewUserPhone('')
+                  }
+                }}
+                autoFocus
+              />
+              <input
+                type="email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                placeholder="Email (optional)"
+                className="border border-borderLight rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <input
+                type="tel"
+                value={newUserPhone}
+                onChange={(e) => setNewUserPhone(e.target.value)}
+                placeholder="Phone (optional)"
+                className="border border-borderLight rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                onClick={handleAddUser}
+                disabled={addingUser || !newUserName.trim()}
+                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {addingUser ? 'Adding...' : 'Add'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddUser(false)
+                  setNewUserName('')
+                  setNewUserEmail('')
+                  setNewUserPhone('')
+                }}
+                className="bg-gray-100 text-textMain px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+
         {users.length === 0 ? (
           <p className="text-sm text-textMuted">No maintenance users found.</p>
         ) : (
